@@ -9,22 +9,54 @@ angular.module('contactbooster', ['ionic', 'restangular'])
           extractedData.total = data.total
         return extractedData
   )
-  .controller('ContactsCtrl', ($scope, Contactbooster) ->
-    $scope.contactsInitialized    = false
-    $scope.contactListInitialized = false
-    $scope.contactLists           = [ ]
+  .controller('ContactsCtrl', ($scope, Contactbooster, $ionicModal) ->
 
-    $scope.activeContacts         = [ ]
-    $scope.activeContactLists     = [ ]
+    ContactView = new ContactsController $scope, Contactbooster, $ionicModal
+    ContactView.fetch()
 
-    Contactbooster.all('lists').getList().then (lists) ->
-      $scope.contactListInitialized = true
-      $scope.contactLists           = lists
-      $scope.activeContactLists     = _.map( lists, (list) -> list.name )
-
-    $scope.selectList = (index) ->
-      $scope.contactsInitialized = true
-      $scope.activeContacts      = $scope.contactLists[index].contacts
-      console.log $scope.activeContacts[0]
-      console.log $scope.activeContacts[0].lastname
   )
+
+class ContactsController
+  constructor: ($scope, Contactbooster, $ionicModal) ->
+    @scope                        = $scope
+    @scope.contactsInitialized    = false
+    @scope.contactListInitialized = false
+    @scope.contactLists           = [ ]
+    @scope.activeContacts         = [ ]
+    @scope.activeContactLists     = [ ]
+
+    @ionicModal = $ionicModal
+    @initNewContactModal()
+
+    @Contactbooster = Contactbooster
+    @delegateEvent()
+
+  initNewContactModal: ->
+    @ionicModal.fromTemplateUrl 'new-contact.html', (modal) =>
+      @scope.contactModal = modal
+    , { scope: @scope, animation: 'slide-in-up' }
+
+  delegateEvent: ->
+    @scope.selectList      = @selectList
+    @scope.newContact      = @newContact
+    @scope.closeNewContact = @closeNewContact
+    @scope.createContact   = @createContact
+
+  newContact: =>
+    console.log @scope.contactModal
+    @scope.contactModal.show()
+  closeNewContact: =>
+    @scope.contactModal.hide()
+  createContact: (contact) =>
+    @scope.activeContacts.push contact
+    @scope.contactModal.hide()
+
+  fetch: ->
+    @Contactbooster.all('lists').getList().then (lists) =>
+      @scope.contactListInitialized = true
+      @scope.contactLists           = lists
+      @scope.activeContactLists     = _.map( lists, (list) -> list.name )
+  selectList: (index) =>
+    @scope.contactsInitialized = true
+    @scope.activeContacts      = @scope.contactLists[index].contacts
+

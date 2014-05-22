@@ -22,6 +22,9 @@
       <ion-side-menu-content>
         <ion-header-bar class="bar-dark">
           <h1 class="title">Contacts</h1>
+          <button ng-show='contactsInitialized' class="button button-icon" ng-click="newContact()">
+            <i class="icon ion-compose"></i>
+          </button>
         </ion-header-bar>
         <ion-content>
 
@@ -55,5 +58,38 @@
       </ion-side-menu>
 
     </ion-side-menus>
+
+    <script id="new-contact.html" type="text/ng-template">
+
+      <div class="modal">
+
+        <!-- Modal header bar -->
+        <ion-header-bar class="bar-secondary">
+          <h1 class="title">New Contact</h1>
+          <button class="button button-clear button-positive" ng-click="closeNewContact()">Cancel</button>
+        </ion-header-bar>
+
+        <!-- Modal content area -->
+        <ion-content>
+
+          <form ng-submit="createContact(contact)">
+            <div class="list">
+              <label class="item item-input">
+                <input type="text" placeholder="firstname" ng-model="contact.firstname">
+                <input type="text" placeholder="lastname" ng-model="contact.lastname">
+                <input type="text" placeholder="phone" ng-model="contact.phone">
+              </label>
+            </div>
+            <div class="padding">
+              <button type="submit" class="button button-block button-positive">Create Contact</button>
+            </div>
+          </form>
+
+        </ion-content>
+
+      </div>
+
+    </script>
+
   </body>
 </html>

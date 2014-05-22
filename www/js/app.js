@@ -29,6 +29,8 @@
       this.ionicActionSheet = ionicActionSheet;
       this.selectList = __bind(this.selectList, this);
       this.createContact = __bind(this.createContact, this);
+      this.editContact = __bind(this.editContact, this);
+      this.submitContact = __bind(this.submitContact, this);
       this.closeNewContact = __bind(this.closeNewContact, this);
       this.newContact = __bind(this.newContact, this);
       this.actionContact = __bind(this.actionContact, this);
@@ -56,13 +58,15 @@
     ContactsController.prototype.delegateEvent = function() {
       this.scope.selectList = this.selectList;
       this.scope.newContact = this.newContact;
+      this.scope.submitContact = this.submitContact;
       this.scope.closeNewContact = this.closeNewContact;
       this.scope.createContact = this.createContact;
       return this.scope.actionContact = this.actionContact;
     };
 
-    ContactsController.prototype.actionContact = function(contactId) {
-      console.log(this.ionicActionSheet);
+    ContactsController.prototype.actionContact = function(contact) {
+      var contactId;
+      contactId = contact.id;
       return this.ionicActionSheet.show({
         buttons: [
           {
@@ -84,9 +88,12 @@
         cancelText: "Cancel",
         buttonClicked: (function(_this) {
           return function(index) {
+            _this.scope.contact = angular.copy(contact);
+            _this.newContact();
             return true;
           };
-        })(this)
+        })(this),
+        cancel: function() {}
       });
     };
 
@@ -98,24 +105,61 @@
       return this.scope.contactModal.hide();
     };
 
-    ContactsController.prototype.createContact = function(contact) {
-      var new_contact;
+    ContactsController.prototype.submitContact = function(contact) {
+      var contact_to_save, q;
       this.ionicLoading.show({
         template: 'Creating new contact...'
       });
-      new_contact = {
+      contact_to_save = {
         contact: contact
       };
-      return this.Contactbooster.one('lists', this.scope.activeContacts.id).post('contacts', new_contact).then((function(_this) {
-        return function(created) {
-          console.log(created, contact, new_contact, _this.scope.activeContacts);
-          _this.scope.activeContacts.contacts.push(contact);
+      if (contact.id) {
+        console.log("Edit");
+        q = this.editContact(contact_to_save);
+      } else {
+        q = this.createContact(contact_to_save);
+      }
+      return q.then((function(_this) {
+        return function() {
           _this.ionicLoading.hide();
-          return _this.scope.contactModal.hide();
+          _this.scope.contactModal.hide();
+          return _this.scope.contact = {};
         };
       })(this), function() {
         return alert("Please, try again.");
       });
+    };
+
+    ContactsController.prototype.editContact = function(contact) {
+      var q;
+      q = this.Contactbooster.one('lists', this.scope.activeContacts.id).one('contacts', contact.contact.id).patch(contact);
+      q.then((function(_this) {
+        return function(modified) {
+          var key, old_contact, _i, _len, _ref, _results;
+          old_contact = _.findWhere(_this.scope.activeContacts.contacts, {
+            id: contact.contact.id
+          });
+          _ref = ['lastname', 'firstname', 'phone'];
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            key = _ref[_i];
+            _results.push(old_contact[key] = contact.contact[key]);
+          }
+          return _results;
+        };
+      })(this));
+      return q;
+    };
+
+    ContactsController.prototype.createContact = function(contact) {
+      var q;
+      q = this.Contactbooster.one('lists', this.scope.activeContacts.id).post('contacts', contact);
+      q.then((function(_this) {
+        return function(created) {
+          return _this.scope.activeContacts.contacts.push(contact.contact);
+        };
+      })(this));
+      return q;
     };
 
     ContactsController.prototype.fetch = function() {

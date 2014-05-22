@@ -34,7 +34,7 @@
               <div class='item item-button-right' style='border:0;padding:0'>
                <strong>{{ c.lastname }}</strong> {{ c.firstname }}
                <div> <i class='ion-ios7-telephone'></i> <small> {{ c.phone }} </small> </div>
-               <button class="button button-positive" ng-click='actionContact(c.id)'>
+               <button class="button button-positive" ng-click='actionContact(c)'>
                  <i class="ion-grid"></i>
                </button>
              </div>
@@ -78,9 +78,10 @@
         <!-- Modal content area -->
         <ion-content>
 
-          <form ng-submit="createContact(contact)">
+          <form ng-submit="submitContact(contact)">
             <div class="list">
               <label class="item item-input">
+                <input type="hidden" ng-model="contact.id">
                 <input type="text" placeholder="firstname" ng-model="contact.firstname">
                 <input type="text" placeholder="lastname" ng-model="contact.lastname">
                 <input type="text" placeholder="phone" ng-model="contact.phone">

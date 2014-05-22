@@ -38,12 +38,13 @@ class ContactsController
   delegateEvent: ->
     @scope.selectList      = @selectList
     @scope.newContact      = @newContact
+    @scope.submitContact   = @submitContact
     @scope.closeNewContact = @closeNewContact
     @scope.createContact   = @createContact
     @scope.actionContact   = @actionContact
 
-  actionContact: (contactId) =>
-    console.log @ionicActionSheet
+  actionContact: (contact) =>
+    contactId = contact.id
     @ionicActionSheet.show({
       buttons: [ { text: 'Edit' } ]
       , destructiveText: 'Delete'
@@ -55,23 +56,47 @@ class ContactsController
       , titleText: "Make an action for this contact"
       , cancelText: "Cancel"
       , buttonClicked: (index) =>
+        @scope.contact = angular.copy contact
+        @newContact()
         return true
+      , cancel: ->
     })
   newContact: =>
     @scope.contactModal.show()
   closeNewContact: =>
     @scope.contactModal.hide()
-  createContact: (contact) =>
+  submitContact: (contact) =>
+    # prep the request
     @ionicLoading.show({ template: 'Creating new contact...'})
-    new_contact = { contact: contact }
-    @Contactbooster.one('lists', @scope.activeContacts.id).post('contacts', new_contact).then (created) =>
-      console.log created, contact, new_contact, @scope.activeContacts
-      @scope.activeContacts.contacts.push contact
+    contact_to_save = { contact: contact }
+
+    # branch depending on context
+    if contact.id
+      console.log "Edit"
+      q = @editContact contact_to_save
+    else
+      q = @createContact contact_to_save
+
+    # Generic end of edit/create handling
+    q.then =>
       @ionicLoading.hide()
       @scope.contactModal.hide()
+      @scope.contact = {}
     , ->
       alert ("Please, try again.")
 
+  editContact: (contact) =>
+    q = @Contactbooster.one('lists', @scope.activeContacts.id).one('contacts', contact.contact.id).patch(contact)
+    q.then (modified) =>
+      old_contact = _.findWhere(@scope.activeContacts.contacts, {id: contact.contact.id})
+      for key in ['lastname','firstname','phone']
+        old_contact[key] = contact.contact[key]
+    return q
+  createContact: (contact) =>
+    q = @Contactbooster.one('lists', @scope.activeContacts.id).post('contacts', contact)
+    q.then (created) =>
+      @scope.activeContacts.contacts.push contact.contact
+    return q
   fetch: ->
     @ionicLoading.show({ template: 'Fetching lists...'})
     @Contactbooster.all('lists').getList().then (lists) =>

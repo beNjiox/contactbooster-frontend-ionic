@@ -14,14 +14,17 @@
         return extractedData;
       });
     });
-  }).controller('ContactsCtrl', function($scope, Contactbooster, $ionicModal) {
+  }).controller('ContactsCtrl', function($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate) {
     var ContactView;
-    ContactView = new ContactsController($scope, Contactbooster, $ionicModal);
+    ContactView = new ContactsController($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate);
     return ContactView.fetch();
   });
 
   ContactsController = (function() {
-    function ContactsController($scope, Contactbooster, $ionicModal) {
+    function ContactsController($scope, Contactbooster, ionicModal, ionicSideMenuDelegate) {
+      this.Contactbooster = Contactbooster;
+      this.ionicModal = ionicModal;
+      this.ionicSideMenuDelegate = ionicSideMenuDelegate;
       this.selectList = __bind(this.selectList, this);
       this.createContact = __bind(this.createContact, this);
       this.closeNewContact = __bind(this.closeNewContact, this);
@@ -32,9 +35,7 @@
       this.scope.contactLists = [];
       this.scope.activeContacts = [];
       this.scope.activeContactLists = [];
-      this.ionicModal = $ionicModal;
       this.initNewContactModal();
-      this.Contactbooster = Contactbooster;
       this.delegateEvent();
     }
 
@@ -57,7 +58,6 @@
     };
 
     ContactsController.prototype.newContact = function() {
-      console.log(this.scope.contactModal);
       return this.scope.contactModal.show();
     };
 
@@ -66,8 +66,19 @@
     };
 
     ContactsController.prototype.createContact = function(contact) {
-      this.scope.activeContacts.push(contact);
-      return this.scope.contactModal.hide();
+      var new_contact;
+      new_contact = {
+        contact: contact
+      };
+      return this.Contactbooster.one('lists', this.scope.activeContacts.id).post('contacts', new_contact).then((function(_this) {
+        return function(created) {
+          console.log(created, contact, new_contact, _this.scope.activeContacts);
+          _this.scope.activeContacts.contacts.push(contact);
+          return _this.scope.contactModal.hide();
+        };
+      })(this), function() {
+        return alert("Please, try again.");
+      });
     };
 
     ContactsController.prototype.fetch = function() {
@@ -84,7 +95,9 @@
 
     ContactsController.prototype.selectList = function(index) {
       this.scope.contactsInitialized = true;
-      return this.scope.activeContacts = this.scope.contactLists[index].contacts;
+      this.scope.activeContacts = this.scope.contactLists[index];
+      this.scope.activeListName = this.scope.activeContacts.name;
+      return this.ionicSideMenuDelegate.toggleLeft();
     };
 
     return ContactsController;

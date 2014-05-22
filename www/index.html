@@ -21,7 +21,7 @@
       <!-- Center content -->
       <ion-side-menu-content>
         <ion-header-bar class="bar-dark">
-          <h1 class="title">Contacts</h1>
+          <h1 class="title">{{ activeListName || "Contacts" }}</h1>
           <button ng-show='contactsInitialized' class="button button-icon" ng-click="newContact()">
             <i class="icon ion-compose"></i>
           </button>
@@ -29,7 +29,7 @@
         <ion-content>
 
           <ion-list ng-show='contactsInitialized'>
-            <ion-item ng-repeat='c in activeContacts'>
+            <ion-item ng-repeat='c in activeContacts.contacts'>
               <div> <strong>{{ c.lastname }}</strong> {{ c.firstname }} </div>
               <div> <i class='ion-ios7-telephone'></i> <small> {{ c.phone }} </small> </div>
             </ion-item>

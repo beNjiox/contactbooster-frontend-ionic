@@ -9,15 +9,15 @@ angular.module('contactbooster', ['ionic', 'restangular'])
           extractedData.total = data.total
         return extractedData
   )
-  .controller('ContactsCtrl', ($scope, Contactbooster, $ionicModal) ->
+  .controller('ContactsCtrl', ($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate) ->
 
-    ContactView = new ContactsController $scope, Contactbooster, $ionicModal
+    ContactView = new ContactsController $scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate
     ContactView.fetch()
 
   )
 
 class ContactsController
-  constructor: ($scope, Contactbooster, $ionicModal) ->
+  constructor: ($scope, @Contactbooster, @ionicModal, @ionicSideMenuDelegate) ->
     @scope                        = $scope
     @scope.contactsInitialized    = false
     @scope.contactListInitialized = false
@@ -25,10 +25,8 @@ class ContactsController
     @scope.activeContacts         = [ ]
     @scope.activeContactLists     = [ ]
 
-    @ionicModal = $ionicModal
     @initNewContactModal()
 
-    @Contactbooster = Contactbooster
     @delegateEvent()
 
   initNewContactModal: ->
@@ -43,13 +41,17 @@ class ContactsController
     @scope.createContact   = @createContact
 
   newContact: =>
-    console.log @scope.contactModal
     @scope.contactModal.show()
   closeNewContact: =>
     @scope.contactModal.hide()
   createContact: (contact) =>
-    @scope.activeContacts.push contact
-    @scope.contactModal.hide()
+    new_contact = { contact: contact }
+    @Contactbooster.one('lists', @scope.activeContacts.id).post('contacts', new_contact).then (created) =>
+      console.log created, contact, new_contact, @scope.activeContacts
+      @scope.activeContacts.contacts.push contact
+      @scope.contactModal.hide()
+    , ->
+      alert ("Please, try again.")
 
   fetch: ->
     @Contactbooster.all('lists').getList().then (lists) =>
@@ -58,5 +60,7 @@ class ContactsController
       @scope.activeContactLists     = _.map( lists, (list) -> list.name )
   selectList: (index) =>
     @scope.contactsInitialized = true
-    @scope.activeContacts      = @scope.contactLists[index].contacts
+    @scope.activeContacts      = @scope.contactLists[index]
+    @scope.activeListName      = @scope.activeContacts.name
+    @ionicSideMenuDelegate.toggleLeft()
 

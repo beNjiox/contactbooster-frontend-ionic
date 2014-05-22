@@ -20,6 +20,7 @@
     "tests"
   ],
   "dependencies": {
-    "restangular": "~1.4.0"
+    "restangular": "~1.4.0",
+    "jquery": "~2.1.1"
   }
 }

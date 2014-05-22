@@ -14,21 +14,24 @@
         return extractedData;
       });
     });
-  }).controller('ContactsCtrl', function($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate) {
+  }).controller('ContactsCtrl', function($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate, $ionicLoading, $ionicActionSheet) {
     var ContactView;
-    ContactView = new ContactsController($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate);
+    ContactView = new ContactsController($scope, Contactbooster, $ionicModal, $ionicSideMenuDelegate, $ionicLoading, $ionicActionSheet);
     return ContactView.fetch();
   });
 
   ContactsController = (function() {
-    function ContactsController($scope, Contactbooster, ionicModal, ionicSideMenuDelegate) {
+    function ContactsController($scope, Contactbooster, ionicModal, ionicSideMenuDelegate, ionicLoading, ionicActionSheet) {
       this.Contactbooster = Contactbooster;
       this.ionicModal = ionicModal;
       this.ionicSideMenuDelegate = ionicSideMenuDelegate;
+      this.ionicLoading = ionicLoading;
+      this.ionicActionSheet = ionicActionSheet;
       this.selectList = __bind(this.selectList, this);
       this.createContact = __bind(this.createContact, this);
       this.closeNewContact = __bind(this.closeNewContact, this);
       this.newContact = __bind(this.newContact, this);
+      this.actionContact = __bind(this.actionContact, this);
       this.scope = $scope;
       this.scope.contactsInitialized = false;
       this.scope.contactListInitialized = false;
@@ -54,7 +57,37 @@
       this.scope.selectList = this.selectList;
       this.scope.newContact = this.newContact;
       this.scope.closeNewContact = this.closeNewContact;
-      return this.scope.createContact = this.createContact;
+      this.scope.createContact = this.createContact;
+      return this.scope.actionContact = this.actionContact;
+    };
+
+    ContactsController.prototype.actionContact = function(contactId) {
+      console.log(this.ionicActionSheet);
+      return this.ionicActionSheet.show({
+        buttons: [
+          {
+            text: 'Edit'
+          }
+        ],
+        destructiveText: 'Delete',
+        destructiveButtonClicked: (function(_this) {
+          return function() {
+            if (confirm("Are you sure you want to delete contact " + contactId + " ?")) {
+              _this.Contactbooster.one('lists', _this.scope.activeContacts.id).one('contacts', contactId).remove().then(function() {
+                return $("#contact_" + contactId).fadeOut('fast');
+              });
+              return true;
+            }
+          };
+        })(this),
+        titleText: "Make an action for this contact",
+        cancelText: "Cancel",
+        buttonClicked: (function(_this) {
+          return function(index) {
+            return true;
+          };
+        })(this)
+      });
     };
 
     ContactsController.prototype.newContact = function() {
@@ -67,6 +100,9 @@
 
     ContactsController.prototype.createContact = function(contact) {
       var new_contact;
+      this.ionicLoading.show({
+        template: 'Creating new contact...'
+      });
       new_contact = {
         contact: contact
       };
@@ -74,6 +110,7 @@
         return function(created) {
           console.log(created, contact, new_contact, _this.scope.activeContacts);
           _this.scope.activeContacts.contacts.push(contact);
+          _this.ionicLoading.hide();
           return _this.scope.contactModal.hide();
         };
       })(this), function() {
@@ -82,8 +119,12 @@
     };
 
     ContactsController.prototype.fetch = function() {
+      this.ionicLoading.show({
+        template: 'Fetching lists...'
+      });
       return this.Contactbooster.all('lists').getList().then((function(_this) {
         return function(lists) {
+          _this.ionicLoading.hide();
           _this.scope.contactListInitialized = true;
           _this.scope.contactLists = lists;
           return _this.scope.activeContactLists = _.map(lists, function(list) {

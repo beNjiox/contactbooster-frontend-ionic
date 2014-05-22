@@ -1,0 +1,25 @@
+{
+  "name": "contactbooster/ionic",
+  "version": "0.1.0",
+  "authors": [
+    "beNjiox <benjamin@guez.fr>"
+  ],
+  "description": "contactbooster client using ionic and angular",
+  "keywords": [
+    "angular",
+    "ionic",
+    "sample-app"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "restangular": "~1.4.0"
+  }
+}

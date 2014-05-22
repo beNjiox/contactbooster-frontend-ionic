@@ -1,0 +1,21 @@
+@import url(http://fonts.googleapis.com/css?family=Nunito:400,700,300);
+
+*, *:before, *:after {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+  font-family: 'Nunito', sans-serif;
+}
+
+.alert-box {
+  padding: 5px;
+  width:90%;
+  margin:auto;
+  text-align:center;
+  margin-top:10px;
+
+  &.alert-box-info {
+    background-color: #3D9970;
+    color:white;
+    font-weight: 200;
+  }
+
+}

@@ -79,7 +79,7 @@ gulp.task('spec', function(){
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
   gulp.watch(paths.coffee, ['coffee']);
-  gulp.watch(paths.specs, ['specs_coffee']);
+  gulp.watch(paths.specs_coffee, ['specs_coffee']);
 });
 
 gulp.task('dev', ['sass', 'coffee', 'specs_coffee', 'watch', 'testing_connect', 'connect' ]);

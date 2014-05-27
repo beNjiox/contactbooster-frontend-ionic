@@ -1,10 +1,20 @@
 (function() {
-  var ContactsController,
+  var App, ContactsController,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  angular.module('contactbooster', ['ionic', 'restangular']).factory('Contactbooster', function(Restangular) {
+  App = angular.module('contactbooster', ['ionic', 'restangular']);
+
+  if (window.location.origin === "http://localhost:8080") {
+    App.constant('BASE_URL', "http://localhost:3000/");
+  } else if (window.location.origin === "http://localhost:8033") {
+    App.constant('BASE_URL', 'http://railscontactbooster.apiary-mock.com/');
+  } else {
+    throw new Error("Bad location origin");
+  }
+
+  App.factory('Contactbooster', function(Restangular, BASE_URL) {
     return Restangular.withConfig(function(RestangularConfigurer) {
-      RestangularConfigurer.setBaseUrl('http://localhost:3001');
+      RestangularConfigurer.setBaseUrl(BASE_URL);
       return RestangularConfigurer.addResponseInterceptor(function(data, operation, what, url, response, deferred) {
         var extractedData;
         if (operation === "getList") {
@@ -30,22 +40,27 @@
       this.selectList = __bind(this.selectList, this);
       this.createContact = __bind(this.createContact, this);
       this.editContact = __bind(this.editContact, this);
+      this.error_cleanup = __bind(this.error_cleanup, this);
+      this.success_cleanup = __bind(this.success_cleanup, this);
       this.submitContact = __bind(this.submitContact, this);
-      this.closeNewContact = __bind(this.closeNewContact, this);
-      this.newContact = __bind(this.newContact, this);
+      this.closeContactForm = __bind(this.closeContactForm, this);
+      this.contactForm = __bind(this.contactForm, this);
+      this.removeContactFromMemory = __bind(this.removeContactFromMemory, this);
+      this.deleteContact = __bind(this.deleteContact, this);
       this.actionContact = __bind(this.actionContact, this);
       this.scope = $scope;
+      this.scope.contact = {};
       this.scope.contactsInitialized = false;
       this.scope.contactListInitialized = false;
       this.scope.contactLists = [];
       this.scope.activeContacts = [];
       this.scope.activeContactLists = [];
-      this.initNewContactModal();
+      this.initContactFormModal();
       this.delegateEvent();
     }
 
-    ContactsController.prototype.initNewContactModal = function() {
-      return this.ionicModal.fromTemplateUrl('new-contact.html', (function(_this) {
+    ContactsController.prototype.initContactFormModal = function() {
+      return this.ionicModal.fromTemplateUrl('./partials/contact_form.html', (function(_this) {
         return function(modal) {
           return _this.scope.contactModal = modal;
         };
@@ -57,9 +72,9 @@
 
     ContactsController.prototype.delegateEvent = function() {
       this.scope.selectList = this.selectList;
-      this.scope.newContact = this.newContact;
+      this.scope.contactForm = this.contactForm;
       this.scope.submitContact = this.submitContact;
-      this.scope.closeNewContact = this.closeNewContact;
+      this.scope.closeContactForm = this.closeContactForm;
       this.scope.createContact = this.createContact;
       return this.scope.actionContact = this.actionContact;
     };
@@ -77,10 +92,7 @@
         destructiveButtonClicked: (function(_this) {
           return function() {
             if (confirm("Are you sure you want to delete contact " + contactId + " ?")) {
-              _this.Contactbooster.one('lists', _this.scope.activeContacts.id).one('contacts', contactId).remove().then(function() {
-                return $("#contact_" + contactId).fadeOut('fast');
-              });
-              return true;
+              return _this.deleteContact(contactId);
             }
           };
         })(this),
@@ -88,8 +100,7 @@
         cancelText: "Cancel",
         buttonClicked: (function(_this) {
           return function(index) {
-            _this.scope.contact = angular.copy(contact);
-            _this.newContact();
+            _this.contactForm(angular.copy(contact));
             return true;
           };
         })(this),
@@ -97,16 +108,50 @@
       });
     };
 
-    ContactsController.prototype.newContact = function() {
+    ContactsController.prototype.deleteContact = function(contactId) {
+      this.Contactbooster.one('lists', this.scope.activeContacts.id).one('contacts', contactId).remove().then((function(_this) {
+        return function() {
+          $("#contact_" + contactId).fadeOut('fast');
+          return _this.scope.activeContacts.contacts = _this.removeContactFromMemory;
+        };
+      })(this));
+      return true;
+    };
+
+    ContactsController.prototype.removeContactFromMemory = function() {
+      return _.without(this.scope.activeContacts.contacts, _.findWhere(this.scope.activeContacts.contacts, {
+        id: contactId
+      }));
+    };
+
+    ContactsController.prototype.contactForm = function(contact) {
+      if (contact == null) {
+        contact = {};
+      }
+      this.scope.contact = contact;
+      if (this.scope.contact.id) {
+        this.scope.modal = {
+          title: "Edit contact: #" + this.scope.contact.id,
+          text_button: "Edit contact"
+        };
+      } else {
+        this.scope.modal = {
+          title: "New contact",
+          text_button: "Add"
+        };
+      }
       return this.scope.contactModal.show();
     };
 
-    ContactsController.prototype.closeNewContact = function() {
+    ContactsController.prototype.closeContactForm = function() {
       return this.scope.contactModal.hide();
     };
 
     ContactsController.prototype.submitContact = function(contact) {
       var contact_to_save, q;
+      if (_.isEmpty(contact)) {
+        return alert("Please fill the fields");
+      }
       this.ionicLoading.show({
         template: 'Creating new contact...'
       });
@@ -114,20 +159,28 @@
         contact: contact
       };
       if (contact.id) {
-        console.log("Edit");
         q = this.editContact(contact_to_save);
       } else {
         q = this.createContact(contact_to_save);
       }
-      return q.then((function(_this) {
-        return function() {
-          _this.ionicLoading.hide();
-          _this.scope.contactModal.hide();
-          return _this.scope.contact = {};
-        };
-      })(this), function() {
-        return alert("Please, try again.");
-      });
+      return q.then(this.success_cleanup, this.error_cleanup);
+    };
+
+    ContactsController.prototype.success_cleanup = function() {
+      this.ionicLoading.hide();
+      return this.scope.contactModal.hide();
+    };
+
+    ContactsController.prototype.error_cleanup = function(err) {
+      var error, error_string, field, _ref;
+      this.ionicLoading.hide();
+      error_string = "Validation error\n";
+      _ref = err.data.error;
+      for (field in _ref) {
+        error = _ref[field];
+        error_string += "" + field + " : " + error[0] + "\n";
+      }
+      return alert(error_string);
     };
 
     ContactsController.prototype.editContact = function(contact) {
@@ -164,7 +217,7 @@
 
     ContactsController.prototype.fetch = function() {
       this.ionicLoading.show({
-        template: 'Fetching lists...'
+        template: 'Fetching lists.....'
       });
       return this.Contactbooster.all('lists').getList().then((function(_this) {
         return function(lists) {

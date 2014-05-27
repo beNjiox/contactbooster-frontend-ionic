@@ -6432,6 +6432,10 @@ a.button {
   transition: none !important; }
 
 @import url(http://fonts.googleapis.com/css?family=Nunito:400,700,300);
+@import url(http://fonts.googleapis.com/css?family=Lato);
+.text-center {
+  text-align: center; }
+
 *, *:before, *:after {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -6448,3 +6452,8 @@ a.button {
     background-color: #3D9970;
     color: white;
     font-weight: 200; }
+
+.contact-list-item {
+  font-variant: small-caps;
+  font-size: 20px;
+  cursor: pointer; }

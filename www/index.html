@@ -22,14 +22,25 @@
       <!-- Center content -->
       <ion-side-menu-content>
         <ion-header-bar class="bar-dark">
+          <button menu-toggle="left" class="button button-icon" id='toggleLeftBtn'>
+            <i class="icon ion-navicon"></i>
+          </button>
           <h1 class="title">{{ activeListName || "Contacts" }}</h1>
-          <button ng-show='contactsInitialized' class="button button-icon" ng-click="newContact()">
+          <button ng-show='contactsInitialized' class="button button-icon" ng-click="contactForm()">
             <i class="icon ion-compose"></i>
           </button>
         </ion-header-bar>
         <ion-content>
+          <div ng-show='contactsInitialized && activeContacts.contacts.length == 0' class='text-center'>
+            <div class='alert-box alert-box-info'>
+              <div>There is no contact in this list.</div>
+            </div>
+            <button ng-click="contactForm()"
+                    class='button button-small button-positive'
+                    style='padding: 0 15px;margin-top:10px;'> Add one </button>
 
-          <ion-list ng-show='contactsInitialized'>
+          </div>
+          <ion-list ng-show='contactsInitialized && activeContacts.contacts.length > 0'>
             <ion-item ng-repeat='c in activeContacts.contacts'  id='contact_{{c.id}}'>
               <div class='item item-button-right' style='border:0;padding:0'>
                <strong>{{ c.lastname }}</strong> {{ c.firstname }}
@@ -41,7 +52,7 @@
             </ion-item>
           </ion-list>
           <div ng-show='!contactsInitialized' class='alert-box alert-box-info'>
-            Select a contact list to diplay! (swipe right)
+            Select a contact list to display! (swipe right)
           </div>
         </ion-content>
       </ion-side-menu-content>
@@ -57,46 +68,13 @@
           </div>
           <ion-list ng-show='contactListInitialized'>
             <ion-item ng-repeat='contactList in activeContactLists'>
-              <span ng-click='selectList($index)'>{{ contactList }}</span>
+              <div id='{{contactList}}_list' ng-click='selectList($index)' class='contact-list-item'>{{ contactList }}</div>
             </ion-item>
           </ion-list>
         </ion-content>
       </ion-side-menu>
 
     </ion-side-menus>
-
-    <script id="new-contact.html" type="text/ng-template">
-
-      <div class="modal">
-
-        <!-- Modal header bar -->
-        <ion-header-bar class="bar-secondary">
-          <h1 class="title">New Contact</h1>
-          <button class="button button-clear button-positive" ng-click="closeNewContact()">Cancel</button>
-        </ion-header-bar>
-
-        <!-- Modal content area -->
-        <ion-content>
-
-          <form ng-submit="submitContact(contact)">
-            <div class="list">
-              <label class="item item-input">
-                <input type="hidden" ng-model="contact.id">
-                <input type="text" placeholder="firstname" ng-model="contact.firstname">
-                <input type="text" placeholder="lastname" ng-model="contact.lastname">
-                <input type="text" placeholder="phone" ng-model="contact.phone">
-              </label>
-            </div>
-            <div class="padding">
-              <button type="submit" class="button button-block button-positive">Create Contact</button>
-            </div>
-          </form>
-
-        </ion-content>
-
-      </div>
-
-    </script>
 
   </body>
 </html>

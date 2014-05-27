@@ -1,0 +1,28 @@
+<div class="modal">
+
+  <!-- Modal header bar -->
+  <ion-header-bar class="bar-secondary">
+    <h1 class="title">{{ modal.title }}</h1>
+    <button class="button button-clear button-positive" ng-click="closeContactForm()">Cancel</button>
+  </ion-header-bar>
+
+  <!-- Modal content area -->
+  <ion-content>
+
+    <form ng-submit="submitContact(contact)">
+      <div class="list">
+        <label class="item item-input">
+          <input type="hidden" ng-model="contact.id">
+          <input type="text" placeholder="firstname" ng-model="contact.firstname">
+          <input type="text" placeholder="lastname" ng-model="contact.lastname">
+          <input type="text" placeholder="phone" ng-model="contact.phone">
+        </label>
+      </div>
+      <div class="padding">
+        <button type="submit" class="button button-block button-positive">{{ modal.text_button }}</button>
+      </div>
+    </form>
+
+  </ion-content>
+
+</div>

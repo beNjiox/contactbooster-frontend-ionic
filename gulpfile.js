@@ -17,7 +17,8 @@ var paths = {
   sass:           ['./scss/**/*.scss'],
   coffee:         ['./coffee/**/*.coffee'],
   specs_coffee:   ['./specs/**/*.coffee'],
-  specs:          ['./specs/*.js']
+  specs:          ['./specs/*.js'],
+  views:          ['./www/index.html', './www/partials/*.html']
 };
 
 gulp.task('connect', function() {
@@ -76,10 +77,16 @@ gulp.task('spec', function(){
       .on('error', function(e) { throw e; });
 });
 
+gulp.task('views', function(){
+  gulp.src(paths.views)
+      .pipe(connect.reload())
+});
+
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
   gulp.watch(paths.coffee, ['coffee']);
   gulp.watch(paths.specs_coffee, ['specs_coffee']);
+  gulp.watch(paths.views, ['views'])
 });
 
 gulp.task('dev', ['sass', 'coffee', 'specs_coffee', 'watch', 'testing_connect', 'connect' ]);

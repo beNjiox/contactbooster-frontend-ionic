@@ -112,14 +112,14 @@
       this.Contactbooster.one('lists', this.scope.activeContacts.id).one('contacts', contactId).remove().then((function(_this) {
         return function() {
           $("#contact_" + contactId).fadeOut('fast');
-          return _this.scope.activeContacts.contacts = _this.removeContactFromMemory;
+          return _this.removeContactFromMemory(contactId);
         };
       })(this));
       return true;
     };
 
-    ContactsController.prototype.removeContactFromMemory = function() {
-      return _.without(this.scope.activeContacts.contacts, _.findWhere(this.scope.activeContacts.contacts, {
+    ContactsController.prototype.removeContactFromMemory = function(contactId) {
+      return this.scope.activeContacts.contacts = _.without(this.scope.activeContacts.contacts, _.findWhere(this.scope.activeContacts.contacts, {
         id: contactId
       }));
     };

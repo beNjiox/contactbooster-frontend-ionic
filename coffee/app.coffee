@@ -89,13 +89,13 @@ class ContactsController
   deleteContact: (contactId) =>
     @Contactbooster.one('lists', @scope.activeContacts.id).one('contacts', contactId).remove().then =>
       $("#contact_#{contactId}").fadeOut('fast')
-      @scope.activeContacts.contacts = @removeContactFromMemory
+      @removeContactFromMemory contactId
     return true
 
 
 
-  removeContactFromMemory: =>
-     _.without(@scope.activeContacts.contacts, _.findWhere(@scope.activeContacts.contacts, { id: contactId }))
+  removeContactFromMemory: (contactId) =>
+     @scope.activeContacts.contacts = _.without(@scope.activeContacts.contacts, _.findWhere(@scope.activeContacts.contacts, { id: contactId }))
 
 
 

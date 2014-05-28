@@ -67,7 +67,7 @@
             Loading lists...
           </div>
           <ion-list ng-show='contactListInitialized'>
-            <ion-item ng-repeat='contactList in activeContactLists'>
+            <ion-item ng-repeat='contactList in activeContactLists track by $index'>
               <div id='{{contactList}}_list' ng-click='selectList($index)' class='contact-list-item'>{{ contactList }}</div>
             </ion-item>
           </ion-list>

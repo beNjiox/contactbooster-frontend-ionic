@@ -79,14 +79,15 @@ gulp.task('spec', function(){
 
 gulp.task('views', function(){
   gulp.src(paths.views)
-      .pipe(connect.reload())
+      .pipe(connect.reload());
 });
 
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
   gulp.watch(paths.coffee, ['coffee']);
   gulp.watch(paths.specs_coffee, ['specs_coffee']);
-  gulp.watch(paths.views, ['views'])
+  gulp.watch(paths.views, ['views']);
 });
 
 gulp.task('dev', ['sass', 'coffee', 'specs_coffee', 'watch', 'testing_connect', 'connect' ]);
+gulp.task('prod', ['sass', 'coffee']);

@@ -9,7 +9,7 @@
   } else if (window.location.origin === "http://localhost:8033") {
     App.constant('BASE_URL', 'http://railscontactbooster.apiary-mock.com/');
   } else {
-    throw new Error("Bad location origin");
+    App.constant('BASE_URL', 'http://contactbooster-rails.herokuapp.com/');
   }
 
   App.factory('Contactbooster', function(Restangular, BASE_URL) {

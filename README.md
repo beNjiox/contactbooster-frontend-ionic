@@ -16,7 +16,7 @@ $> cd contactbooster-backend-ionic && cd www && bower update && npm install
 
 ### Dev mode
 
-just use run ``` gulp ``` in the root directory, it will watch for coffees and scss updates.
+just use run ``` gulp dev ``` in the root directory, it will watch for coffees and scss updates.
 
 ### Run in browser
 

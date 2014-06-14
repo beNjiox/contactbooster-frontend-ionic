@@ -1,3 +1,7 @@
 node_modules/
 www/bower_components
 platforms/^.*
+
+contactbooster-ionic.sublime-project
+
+contactbooster-ionic.sublime-workspace

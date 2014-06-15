@@ -1,5 +1,7 @@
 ## Contactbooster frontend using ionic
 
+See a working demo [here](http://contactbooster-ionic.bguez.io/) (Better on mobile device)
+
 ### Stack:
 
 * [ionic framework](http://ionicframework.com/)
